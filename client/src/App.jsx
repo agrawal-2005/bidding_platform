@@ -78,7 +78,7 @@ export default function App() {
           <p>Real-time auctions with server-synced countdowns.</p>
         </div>
         <div className="header-right">
-          {import.meta.env.VITE_ENABLE_DEMO_RESET !== "true" && (
+          {import.meta.env.VITE_ENABLE_DEMO_RESET === "true" && (
             <button
               className="reset-button"
               onClick={resetAuctions}
