@@ -1,44 +1,118 @@
 # Live Bidding Platform
 
-Real-time auction platform with server-synced countdowns, Socket.io bidding,
-and race-condition safety for concurrent bids.
+![Node.js](https://img.shields.io/badge/Node.js-18+-339933?logo=node.js\&logoColor=white)
+![Express](https://img.shields.io/badge/Express.js-000000?logo=express\&logoColor=white)
+![Socket.io](https://img.shields.io/badge/Socket.io-010101?logo=socket.io\&logoColor=white)
+![React](https://img.shields.io/badge/React-18-61DAFB?logo=react\&logoColor=black)
+![Vite](https://img.shields.io/badge/Vite-646CFF?logo=vite\&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker\&logoColor=white)
+![Render](https://img.shields.io/badge/Render-46E3B7?logo=render\&logoColor=black)
+![Vercel](https://img.shields.io/badge/Vercel-000000?logo=vercel\&logoColor=white)
 
-## Features
+A **real-time auction platform** with **server-authoritative countdowns**, **Socket.io–powered live bidding**, and **race-condition safety** to deterministically handle concurrent bids.
 
-- Live bid updates over Socket.io
-- Server-synced countdown timer
-- Winning / outbid states and visual feedback
-- Server-side auction end events
-- Per-item locking to prevent same-millisecond bid races
-- Docker-ready
+This project was built as part of a **real-time systems challenge**, focusing on **correctness under concurrency**, **synchronization**, and **production-grade architecture**.
 
-## Tech stack
+---
 
-- Backend: Node.js, Express, Socket.io
-- Frontend: React, Vite, Socket.io client
+## 🌐 Live Demo
 
-## Deployed backend
+* **Frontend (Vercel)**
+  👉 [https://bidding-platform-iota.vercel.app](https://bidding-platform-iota.vercel.app)
 
-Backend URL: `https://bidding-platform-w29z.onrender.com`
+* **Backend (Render)**
+  👉 [https://bidding-platform-w29z.onrender.com](https://bidding-platform-w29z.onrender.com)
 
-## Deployed frontend
+> ⚠️ Backend runs on Render free tier — the first request may take a few seconds due to cold start.
 
-Frontend URL: `https://bidding-platform-iota.vercel.app`
+---
 
-## Architecture
+## 🧪 How to Evaluate This Demo (Important)
 
-- `server/`: REST API + Socket.io server, in-memory bid store, locking
-- `client/`: React UI with live updates and timers
-- Socket events keep all clients in sync; REST is used for initial load
+* Auctions **automatically end** after their configured duration
+* To allow reviewers to **actively test bidding**, a **demo-only reset button** is provided
+* The **“Restart Auctions (Demo)”** button:
 
-## Screenshots
+  * Resets all auctions on the server
+  * Re-seeds items with fresh countdown timers
+  * Is intentionally **not production behavior**
 
-Screenshots from the app UI:
+This ensures the project is **testable even after deployment** and avoids appearing as a static UI.
 
-![Bidding View](./docs/screenshots/bidding.png)
-![Winning State](./docs/screenshots/winner.png)
+---
 
-## File structure
+## 🚀 Key Highlights
+
+* 🔄 Real-time bid updates using **Socket.io**
+* ⏱️ **Server-synchronized countdown timers** (client time cannot be trusted)
+* 🏁 **Authoritative auction end enforced on the server**
+* 🔒 Per-item locking to prevent same-millisecond bid races
+* ⚡ Immediate outbid / validation feedback
+* 🧪 Unit-tested bid validation and concurrency logic
+* 🐳 Dockerfile included for reproducible local setup
+
+---
+
+## 🧠 What This Project Demonstrates
+
+* Designing **real-time distributed systems**
+* Preventing **race conditions** under concurrent writes
+* Mixing **REST (initial state)** + **WebSockets (live updates)**
+* Clean separation of concerns (store, locks, sockets, UI)
+* Writing **testable backend business logic**
+* Making deliberate **scope vs complexity trade-offs**
+
+---
+
+## 🛠️ Tech Stack
+
+### Backend
+
+* Node.js
+* Express
+* Socket.io
+* In-memory data store
+* Custom per-item locking mechanism
+
+### Frontend
+
+* React
+* Vite
+* Socket.io client
+* Custom hooks for socket lifecycle management
+
+### Infrastructure
+
+* Docker
+* Render (Backend)
+* Vercel (Frontend)
+
+---
+
+## 🧩 System Architecture
+
+```
+Client (React)
+  │
+  ├── REST API (initial items + server time)
+  │
+  └── Socket.io (live bidding & events)
+        │
+        └── Node.js Server
+              ├── In-memory bid store
+              ├── Per-item locks
+              └── Server-controlled auction timers
+```
+
+### Why this design?
+
+* REST provides a clean initial snapshot
+* WebSockets ensure instant synchronization
+* Server time is the **single source of truth**
+
+---
+
+## 📁 Project Structure
 
 ```
 .
@@ -54,131 +128,196 @@ Screenshots from the app UI:
 │   │   ├── socket.js
 │   │   └── styles.css
 │   └── vite.config.js
+│
 ├── server
 │   ├── package.json
 │   ├── src
-│   │   ├── bidStore.js
-│   │   ├── index.js
-│   │   ├── items.js
-│   │   └── locks.js
+│   │   ├── index.js        # Express + Socket.io setup
+│   │   ├── bidStore.js    # Core bidding logic
+│   │   ├── locks.js       # Per-item concurrency control
+│   │   └── items.js       # Seeded auction items
 │   └── test
 │       └── bidStore.test.js
-├── .env.example
+│
 ├── Dockerfile
+├── .env.example
 └── README.md
 ```
 
-## Environment configuration
+---
 
-Create a `.env` from `.env.example` (server) and `client/.env.example` (client)
-to keep configuration clean and production-ready.
+## ⚙️ Environment Configuration
+
+### Server `.env`
 
 ```
 PORT=4000
 CLIENT_ORIGIN=http://localhost:5173
+```
+
+### Client `.env`
+
+```
 VITE_API_BASE=https://bidding-platform-w29z.onrender.com
 VITE_SOCKET_URL=https://bidding-platform-w29z.onrender.com
 ```
 
-This separates runtime config from code and makes deployments predictable.
+All runtime configuration is externalized to avoid environment-specific hardcoding.
 
-## Auction Items
+---
 
-Auction items are seeded in memory on server startup.
-This keeps the focus on real-time bidding and concurrency handling.
-In a production system, items would be managed via an admin service and persisted in a database.
+## ⏱️ Server-Synced Countdown (Critical Requirement)
 
-## Why no database
+Auction timers are **derived from server time**, not the client clock.
 
-This project focuses on real-time bidding, race-condition safety, and UI behavior.
-Using an in-memory store keeps the demo lightweight and makes concurrency behavior
-easy to observe. In production, a database would be required for durability,
-multi-instance scaling, and admin management.
+* Server provides:
 
-## REST API
+  * `serverTime`
+  * `endTime` per auction
+* Client computes remaining time using a server–client offset
+* Server **always validates bids using its own clock**
 
-`GET /items`
+This guarantees:
 
-Returns:
+* Client-side time manipulation is impossible
+* Auction end is deterministic
+* Bid acceptance is authoritative
 
-- `items`: list of items (title, starting price, current bid, auction end time)
-- `serverTime`: current server time (ms)
+---
 
-## Socket events
+## 🏁 Auction Lifecycle
 
-Client → Server:
+* Auctions are **seeded in memory** on server startup
+* Each auction runs for a fixed duration
+* Once ended, auctions are closed
+* Restarting the server or using the demo reset reinitializes auctions
 
-- `BID_PLACED` `{ itemId, amount, bidderId }`
+> This intentional design keeps focus on **real-time correctness** rather than persistence.
 
-Server → Client:
+---
 
-- `UPDATE_BID` `{ itemId, currentBid, highestBidderId, serverTime }`
-- `BID_ERROR` `{ itemId, error }`
-- `AUCTION_ENDED` `{ itemId, winnerId, finalBid, endedAt }`
-- `SERVER_TIME` `{ serverTime }`
+## 🔗 REST API
 
-## Winner logic
+### `GET /items`
 
-The winner is the `highestBidderId` at the moment the auction ends.
-
+```json
+{
+  "items": [
+    {
+      "id": "item-1",
+      "title": "Air Purifier",
+      "currentBid": 210,
+      "endTime": 1710000000000
+    }
+  ],
+  "serverTime": 1710000000123
+}
 ```
+
+---
+
+## 🔌 Socket Events
+
+### Client → Server
+
+* `BID_PLACED`
+
+```json
+{ "itemId": "item-1", "amount": 235 }
+```
+
+### Server → Client
+
+* `UPDATE_BID`
+* `BID_ERROR`
+* `AUCTION_ENDED`
+* `SERVER_TIME`
+
+---
+
+## 🏆 Winner Determination
+
+Winner is decided **entirely on the server**:
+
+```js
 if (Date.now() >= item.endTime) {
   winner = item.highestBidderId;
 }
 ```
 
-Frontend shows:
+UI displays:
 
-- 🏆 “You won” if `highestBidderId === userId`
-- ❌ “You lost” otherwise
+* 🏆 **You won**
+* ❌ **You lost**
 
-## Race-condition strategy
+---
 
-Bids are serialized per item using an in-memory lock. Even if two bids arrive
-in the same millisecond, only the first update wins; the second receives an
-immediate "Outbid" error.
+## 🔒 Race Condition Handling
 
-## Race condition handling
+* Each auction item has its own in-memory lock
+* Bids are serialized per item
+* Same-millisecond bids are deterministically resolved
 
-The server wraps each bid in a per-item lock (`withItemLock`). This ensures
-only one bid mutates an item at a time, so identical bid amounts cannot both win.
+✔ Exactly one bid wins
+✔ Others receive immediate feedback
 
-## How to run tests
+---
 
-```
+## 🧪 Tests
+
+```bash
 cd server
 npm test
 ```
 
-Covers:
+Covered cases:
 
-- Reject non-higher bids
-- Reject bids after auction end
-- Accept higher bids
-- Serialize concurrent bids to prevent same-amount race
+* Lower bid rejection
+* Auction end enforcement
+* Valid bid acceptance
+* Concurrent bid race prevention
 
-## Run locally
+---
 
-### Backend
-```
+## ▶️ Run Locally
+
+```bash
+# Backend
 cd server
 npm install
 npm start
-```
 
-### Frontend
-```
+# Frontend
 cd client
 npm install
 npm run dev
 ```
 
-Open `http://localhost:5173`.
+Open 👉 [http://localhost:5173](http://localhost:5173)
 
-## Docker
-```
+---
+
+## 🐳 Docker
+
+```bash
 docker build -t bidding-platform .
 docker run -p 4000:4000 bidding-platform
 ```
 
-Open `http://localhost:4000`.
+---
+
+## 🔮 Future Improvements
+
+* Persistent database
+* Redis-based distributed locks
+* Authentication
+* Admin auction management
+* Horizontal Socket.io scaling
+
+---
+
+## 👨‍💻 Author
+
+Built to demonstrate **real-time system design**, **concurrency correctness**, and **engineering judgment** under time constraints.
+
+---
