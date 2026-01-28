@@ -66,6 +66,14 @@ function scheduleAuctionEnds() {
   });
 }
 
+app.post("/__reset", (req, res) => {
+  initializeStore();
+  endedEmitted.clear();
+  scheduleAuctionEnds();
+  io.emit("AUCTIONS_RESET");
+  res.json({ ok: true });
+});
+
 io.on("connection", (socket) => {
   socket.emit("SERVER_TIME", { serverTime: Date.now() });
 

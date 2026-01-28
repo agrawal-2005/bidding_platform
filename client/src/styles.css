@@ -38,6 +38,49 @@ body {
   max-width: 520px;
 }
 
+.header-right {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-end;
+  flex: 1;
+}
+
+.reset-button {
+  appearance: none;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  background: rgba(15, 23, 42, 0.55);
+  color: #e2e8f0;
+  border-radius: 999px;
+  padding: 10px 14px;
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  box-shadow: 0 10px 25px rgba(2, 6, 23, 0.22);
+  transition: transform 0.15s ease, box-shadow 0.15s ease,
+    border-color 0.15s ease, background 0.15s ease;
+  white-space: nowrap;
+}
+
+.reset-button:hover {
+  transform: translateY(-1px);
+  border-color: rgba(147, 197, 253, 0.55);
+  background: rgba(37, 99, 235, 0.14);
+  box-shadow: 0 12px 28px rgba(37, 99, 235, 0.18);
+}
+
+.reset-button:active {
+  transform: translateY(0);
+}
+
+.reset-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
 .header-meta {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
@@ -257,6 +300,16 @@ body {
 
   .header {
     align-items: flex-start;
+  }
+
+  .header-right {
+    width: 100%;
+    align-items: stretch;
+  }
+
+  .reset-button {
+    width: 100%;
+    text-align: center;
   }
 
   .header-meta {

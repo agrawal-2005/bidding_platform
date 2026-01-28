@@ -23,6 +23,7 @@ export default function App() {
     placeBid
   } = useBiddingSocket();
   const [now, setNow] = useState(Date.now());
+  const [isResetting, setIsResetting] = useState(false);
 
   useEffect(() => {
     const interval = setInterval(() => setNow(Date.now()), 250);
@@ -35,8 +36,37 @@ export default function App() {
     (item) => item.endTime <= clientNow && item.highestBidderId === userId
   ).length;
 
+  async function resetAuctions() {
+    if (isResetting) return;
+
+    const base = import.meta.env.VITE_API_BASE;
+    if (!base) {
+      alert("VITE_API_BASE is not configured");
+      return;
+    }
+
+    try {
+      setIsResetting(true);
+
+      const res = await fetch(`${base}/__reset`, {
+        method: "POST"
+      });
+
+      if (!res.ok) {
+        throw new Error(`Reset failed: ${res.status}`);
+      }
+
+      window.location.reload();
+    } catch (err) {
+      console.error(err);
+      alert("Failed to restart auctions. Please try again.");
+      setIsResetting(false);
+    }
+  }
+
   function handleBid(item) {
     if (!socketId) return;
+    // console.log("API BASE:", import.meta.env.VITE_API_BASE);
     placeBid(item.id, item.currentBid + BID_INCREMENT);
   }
 
@@ -47,22 +77,36 @@ export default function App() {
           <h1>Live Bidding Platform</h1>
           <p>Real-time auctions with server-synced countdowns.</p>
         </div>
-        <div className="header-meta">
-          <div className="meta-card">
-            <span className="meta-label">Items</span>
-            <span className="meta-value">{items.length}</span>
-          </div>
-          <div className="meta-card">
-            <span className="meta-label">Active</span>
-            <span className="meta-value">{activeCount}</span>
-          </div>
-          <div className="meta-card">
-            <span className="meta-label">Wins</span>
-            <span className="meta-value">{winsCount}</span>
-          </div>
-          <div className="meta-card subtle">
-            <span className="meta-label">Sync</span>
-            <span className="meta-value">{serverOffset}ms</span>
+        <div className="header-right">
+          {import.meta.env.MODE !== "production" && (
+            <button
+              className="reset-button"
+              onClick={resetAuctions}
+              disabled={isResetting}
+              title="Demo-only: resets auctions on the backend"
+              type="button"
+            >
+              {isResetting ? "Restarting…" : "Restart Auctions (Demo)"}
+            </button>
+          )}
+
+          <div className="header-meta">
+            <div className="meta-card">
+              <span className="meta-label">Items</span>
+              <span className="meta-value">{items.length}</span>
+            </div>
+            <div className="meta-card">
+              <span className="meta-label">Active</span>
+              <span className="meta-value">{activeCount}</span>
+            </div>
+            <div className="meta-card">
+              <span className="meta-label">Wins</span>
+              <span className="meta-value">{winsCount}</span>
+            </div>
+            <div className="meta-card subtle">
+              <span className="meta-label">Sync</span>
+              <span className="meta-value">{serverOffset}ms</span>
+            </div>
           </div>
         </div>
       </header>
@@ -79,17 +123,16 @@ export default function App() {
           const status = isEnded
             ? "Ended"
             : isWinning
-            ? "Winning"
-            : isOutbid
-            ? "Outbid"
-            : "Active";
+              ? "Winning"
+              : isOutbid
+                ? "Outbid"
+                : "Active";
 
           return (
             <div
               key={item.id}
-              className={`card ${flashMap[item.id] ? "flash" : ""} ${
-                isOutbid ? "outbid" : ""
-              }`}
+              className={`card ${flashMap[item.id] ? "flash" : ""} ${isOutbid ? "outbid" : ""
+                }`}
             >
               <div className="card-header">
                 <h2>{item.title}</h2>

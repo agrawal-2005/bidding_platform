@@ -101,12 +101,27 @@ export function useBiddingSocket() {
       );
     });
 
+    socket.on("AUCTIONS_RESET", async () => {
+      try {
+        const res = await fetch(`${API_BASE}/items`);
+        if (!res.ok) return;
+        const data = await res.json();
+        setItems(data.items || []);
+        if (data.serverTime) {
+          setServerOffset(data.serverTime - Date.now());
+        }
+      } catch {
+        // swallow errors for demo reset
+      }
+    });
+
     return () => {
       socket.off("connect");
       socket.off("SERVER_TIME");
       socket.off("UPDATE_BID");
       socket.off("BID_ERROR");
       socket.off("AUCTION_ENDED");
+      socket.off("AUCTIONS_RESET");
     };
   }, []);
 
