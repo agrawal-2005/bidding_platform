@@ -17,6 +17,14 @@ and race-condition safety for concurrent bids.
 - Backend: Node.js, Express, Socket.io
 - Frontend: React, Vite, Socket.io client
 
+## Deployed backend
+
+Backend URL: `https://bidding-platform-w29z.onrender.com`
+
+## Deployed frontend
+
+Frontend URL: `https://bidding-platform-iota.vercel.app`
+
 ## Architecture
 
 - `server/`: REST API + Socket.io server, in-memory bid store, locking
@@ -68,8 +76,8 @@ to keep configuration clean and production-ready.
 ```
 PORT=4000
 CLIENT_ORIGIN=http://localhost:5173
-VITE_API_BASE=
-VITE_SOCKET_URL=http://localhost:4000
+VITE_API_BASE=https://bidding-platform-w29z.onrender.com
+VITE_SOCKET_URL=https://bidding-platform-w29z.onrender.com
 ```
 
 This separates runtime config from code and makes deployments predictable.
